@@ -1,0 +1,13 @@
+{
+    "title": "Network Command Center",
+    "description": "Monitor system availability and security certificates in real-time.",
+    "inputPlaceholder": "https://target-server.com",
+    "addButton": "Add System",
+    "statusHeader": "Connection Status",
+    "sslHeader": "SSL Certificate",
+    "online": "Operational",
+    "pending": "Verifying",
+    "error": "No Access",
+    "empty": "No active targets in the monitoring pool.",
+    "days": "days"
+  }

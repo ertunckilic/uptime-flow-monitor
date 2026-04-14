@@ -1,0 +1,13 @@
+{
+    "title": "Ağ İzleme Merkezi",
+    "description": "Sistemlerin erişilebilirliğini ve güvenlik sertifikalarını gerçek zamanlı olarak denetle.",
+    "inputPlaceholder": "https://hedef-sunucu.com",
+    "addButton": "Sistemi Ekle",
+    "statusHeader": "Bağlantı Durumu",
+    "sslHeader": "SSL Sertifikası",
+    "online": "Operasyonel",
+    "pending": "Doğrulanıyor",
+    "error": "Erişim Yok",
+    "empty": "İzleme havuzunda aktif bir hedef bulunmuyor.",
+    "days": "gün"
+  }
