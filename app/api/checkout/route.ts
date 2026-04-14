@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { createClient } from '@/utils/supabase/server';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2023-10-16' as any,
-});
+// Üst kısımdaki tanımlamayı sildik, POST içine aldık
+export async function POST(request: Request) {
+  // Stripe artık sadece biri ödeme yapmak istediğinde uyanacak
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { 
+    apiVersion: '2023-10-16' as any 
+  });
+  
+  // Kodunun geri kalanı...
+}
 
 export async function POST(request: Request) {
   const supabase = await createClient();
