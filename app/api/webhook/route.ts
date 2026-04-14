@@ -3,13 +3,9 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
 export async function POST(req: Request) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { 
-    apiVersion: '2023-10-16' as any 
-  });
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2023-10-16' as any });
   
   const body = await req.text();
-  // Kodunun geri kalanı...
-}
   const signature = req.headers.get('stripe-signature');
 
   if (!signature) {
