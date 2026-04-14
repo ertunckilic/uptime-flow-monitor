@@ -8,7 +8,7 @@ export default function TermsPage() {
         <p className="mb-4">UptimeFlow, kullanıcıların web sitelerinin erişilebilirliğini ve SSL sertifika sürelerini takip etmelerine olanak sağlayan bir SaaS platformudur.</p>
   
         <h2 className="text-2xl font-semibold mt-8 mb-4 text-white">2. Hesap Güvenliği</h2>
-        <p className="mb-4">Hesap bilgilerinin gizliliğinden ve hesabın üzerinden yapılan tüm işlemlerden bizzat sen sorumlusun canım. Şüpheli bir durum fark edersen hemen bize bildirmelisin.</p>
+        <p className="mb-4">Hesap bilgilerinin gizliliğinden ve hesabın üzerinden yapılan tüm işlemlerden bizzat sen sorumlusun. Şüpheli bir durum fark edersen hemen bize bildirmelisin.</p>
   
         <h2 className="text-2xl font-semibold mt-8 mb-4 text-white">3. Abonelik ve Ödemeler</h2>
         <p className="mb-4">Premium özelliklere erişim için belirlenen ücretler Paddle aracılığıyla tahsil edilir. Fiyatlarda değişiklik yapma hakkımız saklıdır.</p>
