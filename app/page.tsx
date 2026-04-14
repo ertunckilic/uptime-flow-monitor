@@ -6,7 +6,7 @@ import DashboardClient from "@/components/DashboardClient";
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>
+  searchParams: Promise<{ error?: string; success?: string }>
 }) {
   const resolvedParams = await searchParams;
   const supabase = await createClient();
