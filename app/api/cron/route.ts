@@ -3,8 +3,6 @@ import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import https from 'https';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 const checkSSLExpiry = (url: string): Promise<number | null> => {
   return new Promise((resolve) => {
     try {
@@ -26,6 +24,9 @@ const checkSSLExpiry = (url: string): Promise<number | null> => {
 };
 
 export async function GET(request: Request) {
+  // Resend motorunu sadece cron çalıştığında uyanacak şekilde buraya aldık
+  const resend = new Resend(process.env.RESEND_API_KEY!);
+
   const authHeader = request.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -38,7 +39,6 @@ export async function GET(request: Request) {
   
   if (!sites || sites.length === 0) return NextResponse.json({ message: 'İzlenecek sistem bulunamadı.' });
 
-  // Kullanıcı bazlı premium kontrolü ve limit güvenlik duvarı
   const userSites: Record<string, any[]> = {};
   sites.forEach(site => {
     if (!userSites[site.user_id]) userSites[site.user_id] = [];
@@ -52,7 +52,6 @@ export async function GET(request: Request) {
     sitesToCheck.push(...targetSites);
   }
 
-  // PARALEL TARAMA MİMARİSİ
   const checks = sitesToCheck.map(async (site) => {
     let isOffline = false;
     
@@ -79,15 +78,15 @@ export async function GET(request: Request) {
           await resend.emails.send({
             from: 'UptimeFlow <onboarding@resend.dev>',
             to: user.email,
-            subject: isDown ? `🔴 ACİL: ${site.url} Çöktü!` : `🟢 DÜZELDİ: ${site.url} Yeniden Aktif!`,
+            subject: isDown ? `ACIL: ${site.url} Coktu!` : `DUZELDI: ${site.url} Yeniden Aktif!`,
             html: `<div style="font-family: monospace; color: #333;">
-              <h2 style="color: ${isDown ? '#e11d48' : '#10b981'};">${isDown ? 'Sistem Çöküşü Algılandı' : 'Sistem Tekrar Çevrimiçi'}</h2>
-              <p><strong>${site.url}</strong> hedefine şu an ${isDown ? 'ulaşılamıyor.' : 'erişim tekrar sağlandı.'}</p>
+              <h2 style="color: ${isDown ? '#e11d48' : '#10b981'};">${isDown ? 'Sistem Cokusu Algilandi' : 'Sistem Tekrar Cevrimici'}</h2>
+              <p><strong>${site.url}</strong> hedefine su an ${isDown ? 'ulasilamiyor.' : 'erisim tekrar saglandi.'}</p>
             </div>`,
           });
         }
       } catch (error) {
-        console.error('Mail gönderim hatası:', error);
+        console.error('Mail gonderim hatasi:', error);
       }
     }
 
@@ -96,5 +95,5 @@ export async function GET(request: Request) {
 
   await Promise.allSettled(checks);
 
-  return NextResponse.json({ success: true, message: 'Tarama tamamlandı.', checked: sitesToCheck.length });
+  return NextResponse.json({ success: true, message: 'Tarama tamamlandi.', checked: sitesToCheck.length });
 }
