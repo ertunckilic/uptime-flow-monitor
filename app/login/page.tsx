@@ -19,27 +19,27 @@ export default function LoginPage({ searchParams }: { searchParams: { error?: st
           </div>
         )}
 
-        <form action={loginUser} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wide text-neutral-500 mb-2">{t.auth.email}</label>
-            <input 
-              type="email" name="email" required
-              className="block w-full px-4 py-3 bg-[#0a0a0a] border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:border-white focus:ring-1 focus:ring-white focus:outline-none transition-colors sm:text-sm"
-              placeholder="isim@sirket.com"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wide text-neutral-500 mb-2">{t.auth.pass}</label>
-            <input 
-              type="password" name="password" required
-              className="block w-full px-4 py-3 bg-[#0a0a0a] border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:border-white focus:ring-1 focus:ring-white focus:outline-none transition-colors sm:text-sm"
-              placeholder="••••••••"
-            />
-          </div>
-          <button type="submit" className="w-full bg-white text-black font-medium py-3 rounded-lg hover:bg-neutral-200 transition-colors mt-2">
-            {t.auth.loginBtn}
-          </button>
-        </form>
+<form action={loginUser} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-neutral-500 mb-2">{t.auth.email}</label>
+              <input 
+                type="email" name="email" required
+                className="block w-full px-4 py-3 bg-[#0a0a0a] border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:border-white focus:ring-1 focus:ring-white focus:outline-none transition-colors sm:text-sm"
+                placeholder={t.auth.placeholderEmail}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-neutral-500 mb-2">{t.auth.pass}</label>
+              <input 
+                type="password" name="password" required
+                className="block w-full px-4 py-3 bg-[#0a0a0a] border border-neutral-800 rounded-lg text-white placeholder-neutral-600 focus:border-white focus:ring-1 focus:ring-white focus:outline-none transition-colors sm:text-sm"
+                placeholder={t.auth.placeholderPass1}
+              />
+            </div>
+            <button type="submit" className="w-full bg-white text-black font-medium py-3 rounded-lg hover:bg-neutral-200 transition-colors mt-2">
+              {t.auth.loginBtn}
+            </button>
+          </form>
 
         <p className="text-center mt-8 text-sm text-neutral-500">
           {t.auth.noAccount} <Link href="/register" className="text-white hover:underline">{t.auth.regBtn}</Link>
