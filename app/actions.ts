@@ -10,7 +10,10 @@ export async function loginUser(formData: FormData) {
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-  if (error) return redirect('/login?error=true');
+  if (error) {
+    // Gerçek hata mesajını URL'ye ekliyoruz
+    return redirect(`/login?error=${encodeURIComponent(error.message)}`);
+  }
   redirect('/dashboard');
 }
 
@@ -24,6 +27,9 @@ export async function registerUser(formData: FormData) {
     email, password, options: { data: { full_name: fullName } }
   });
 
-  if (error) return redirect('/register?error=true');
+  if (error) {
+    // Gerçek hata mesajını URL'ye ekliyoruz
+    return redirect(`/register?error=${encodeURIComponent(error.message)}`);
+  }
   redirect('/dashboard');
 }

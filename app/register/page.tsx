@@ -15,7 +15,11 @@ export default function RegisterPage({ searchParams }: { searchParams: { error?:
 
         {searchParams.error && (
           <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-400 text-sm">
-            {t.auth.errReg}
+            {searchParams.error === 'true' 
+              ? t.auth.errReg 
+              : searchParams.error === 'User already registered'
+                ? (lang === 'tr' ? 'Bu e-posta adresi zaten kullanımda. Lütfen giriş yapın.' : 'This email is already registered. Please sign in.')
+                : searchParams.error}
           </div>
         )}
 

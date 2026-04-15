@@ -15,7 +15,11 @@ export default function LoginPage({ searchParams }: { searchParams: { error?: st
 
         {searchParams.error && (
           <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-400 text-sm">
-            {t.auth.errLogin}
+             {searchParams.error === 'true' 
+              ? t.auth.errLogin 
+              : searchParams.error === 'Invalid login credentials'
+                ? (lang === 'tr' ? 'E-posta veya şifre hatalı.' : 'Invalid email or password.')
+                : searchParams.error}
           </div>
         )}
 
