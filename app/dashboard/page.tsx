@@ -10,73 +10,74 @@ export default async function DashboardPage({
 }) {
   const supabase = await createClient();
 
-  // 1. Kapı Kontrolü: Kullanıcı gerçekten giriş yapmış mı?
+  // 1. Kapı Kontrolü
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return redirect('/login');
   }
 
-  // 2. Verileri Çek: Sadece bu kullanıcıya ait siteleri getir
+  // 2. Verileri Çek ('websites' tablosundan)
   const { data: sites } = await supabase
-    .from('sites') 
+    .from('websites') 
     .select('*')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
-    async function addSite(formData: FormData) {
-      'use server';
-      const url = formData.get('url') as string;
-      if (!url) return;
-  
-      const supabaseServer = await createClient();
-      const { data: { user } } = await supabaseServer.auth.getUser();
-      if (!user) return;
-  
-      try {
-        new URL(url); // URL geçerliliğini kontrol et
-      } catch {
-        redirect('/dashboard?error=invalid');
-      }
-  
-      // Çift kayıt kontrolü
-      const { data: existing } = await supabaseServer
-        .from('sites')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('url', url)
-        .single();
-  
-      if (existing) {
-        redirect('/dashboard?error=duplicate');
-      }
-  
-      // Limit Kontrolü
-      const { count } = await supabaseServer
-        .from('sites')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
-  
-      if (count !== null && count >= 3) {
-        redirect('/dashboard?error=limit');
-      }
-  
-      // Veritabanına Ekle ve Hatayı Yakala
-      const { error } = await supabaseServer.from('sites').insert({
-        user_id: user.id,
-        url: url,
-        status: 'Pending',
-        ssl_days_left: null
-      });
-  
-      // EĞER SUPABASE İZİN VERMEZSE TERMİNALE YAZDIRACAK
-      if (error) {
-        console.error("Supabase Kayıt Hatası:", error.message);
-        // Şimdilik ekranda geçersiz URL hatası gibi gösterelim ki bir şeylerin ters gittiğini anlayalım
-        redirect('/dashboard?error=invalid'); 
-      }
-  
-      revalidatePath('/dashboard');
+  // 3. Ekleme Fonksiyonu
+  async function addSite(formData: FormData) {
+    'use server';
+    const url = formData.get('url') as string;
+    if (!url) return;
+
+    const supabaseServer = await createClient();
+    const { data: { user } } = await supabaseServer.auth.getUser();
+    if (!user) return;
+
+    // URL Geçerlilik Kontrolü
+    try {
+      new URL(url);
+    } catch {
+      return redirect('/dashboard?error=invalid');
     }
+
+    // Çift kayıt kontrolü
+    const { data: existing } = await supabaseServer
+      .from('websites')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('url', url)
+      .single();
+
+    if (existing) {
+      return redirect('/dashboard?error=duplicate');
+    }
+
+    // Limit Kontrolü
+    const { count } = await supabaseServer
+      .from('websites')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id);
+
+    if (count !== null && count >= 3) {
+      return redirect('/dashboard?error=limit');
+    }
+
+    // VERİTABANINA EKLEME
+    const { error } = await supabaseServer.from('websites').insert({
+      user_id: user.id,
+      url: url,
+      status: 'Pending',
+      ssl_days_left: null
+    });
+
+    // RADAR: EĞER SUPABASE HATA VERİRSE, BUNU URL'YE YAPIŞTIR
+    if (error) {
+      return redirect(`/dashboard?error=${encodeURIComponent(error.message)}`);
+    }
+
+    revalidatePath('/dashboard');
+    return redirect('/dashboard'); // Başarılıysa URL'deki eski hataları temizle
+  }
 
   async function deleteSite(formData: FormData) {
     'use server';
@@ -88,7 +89,7 @@ export default async function DashboardPage({
     if (!user) return;
 
     await supabaseServer
-      .from('sites')
+      .from('websites')
       .delete()
       .eq('id', id)
       .eq('user_id', user.id);
