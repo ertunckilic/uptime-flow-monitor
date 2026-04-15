@@ -27,7 +27,18 @@ export async function proxy(request: NextRequest) {
     }
   )
 
-  await supabase.auth.getUser()
+  // 1. Kullanıcıyı tespit et
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // 2. GÜVENLİK DUVARI: Giriş yapmayanları dashboard'dan at
+  if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  // 3. YÖNLENDİRME: Giriş yapanları login/register ekranından uzak tut
+  if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register')) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
 
   return supabaseResponse
 }
