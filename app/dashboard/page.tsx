@@ -16,47 +16,77 @@ export default async function DashboardPage() {
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
-  async function addSite(formData: FormData) {
-    'use server';
-    const url = formData.get('url') as string;
-    if (!url) return;
-
-    const supabaseServer = await createClient();
-    const { data: { user } } = await supabaseServer.auth.getUser();
-    if (!user) return;
-
-    try { new URL(url); } catch { redirect('/dashboard?error=invalid'); }
-
-    const { data: existing } = await supabaseServer
-      .from('websites')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('url', url)
-      .single();
-
-    if (existing) redirect('/dashboard?error=duplicate');
-
-    const { count } = await supabaseServer
-      .from('websites')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id);
-
-    if (count !== null && count >= 3) {
-      redirect('/dashboard?error=limit');
+    async function addSite(formData: FormData) {
+      'use server';
+      const url = formData.get('url') as string;
+      if (!url) return;
+  
+      const supabaseServer = await createClient();
+      const { data: { user } } = await supabaseServer.auth.getUser();
+      if (!user) return;
+  
+      // URL format kontrolü
+      try {
+        new URL(url);
+      } catch {
+        return redirect('/dashboard?error=invalid');
+      }
+  
+      // Mükerrer kayıt kontrolü
+      const { data: existing } = await supabaseServer
+        .from('websites')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('url', url)
+        .single();
+  
+      if (existing) {
+        return redirect('/dashboard?error=duplicate');
+      }
+  
+      // Ücretsiz plan limit kontrolü
+      const { count } = await supabaseServer
+        .from('websites')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+  
+      if (count !== null && count >= 3) {
+        return redirect('/dashboard?error=limit');
+      }
+  
+      // Anlık hızlı tarama (Initial Ping)
+      let initialStatus = 'Pending';
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        
+        const res = await fetch(url, { 
+          method: 'HEAD', 
+          cache: 'no-store',
+          signal: controller.signal 
+        });
+        
+        clearTimeout(timeoutId);
+        initialStatus = res.ok ? 'Online' : 'Error';
+      } catch {
+        initialStatus = 'Error';
+      }
+  
+      // Veritabanına kayıt işlemi
+      const { error } = await supabaseServer.from('websites').insert({
+        user_id: user.id,
+        url: url,
+        status: initialStatus,
+        ssl_days_left: null // SSL analizi arka plandaki Cron Job tarafından yapılacak
+      });
+  
+      if (error) {
+        return redirect(`/dashboard?error=${encodeURIComponent(error.message)}`);
+      }
+  
+      revalidatePath('/dashboard');
+      return redirect('/dashboard'); 
     }
-
-    const { error } = await supabaseServer.from('websites').insert({
-      user_id: user.id,
-      url: url,
-      status: 'Pending',
-      ssl_days_left: null
-    });
-
-    if (error) redirect(`/dashboard?error=${encodeURIComponent(error.message)}`);
-
-    revalidatePath('/dashboard');
-    redirect('/dashboard'); 
-  }
 
   async function deleteSite(formData: FormData) {
     'use server';
