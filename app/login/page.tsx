@@ -5,15 +5,15 @@ import { useLanguage } from '@/components/LanguageContext';
 import { loginUser } from '@/app/actions';
 import { useSearchParams } from 'next/navigation';
 import { Command } from 'lucide-react';
+import { Suspense } from 'react';
 
-export default function LoginPage() {
+function LoginContent() {
   const { t, lang } = useLanguage();
   const searchParams = useSearchParams();
   const errorMsg = searchParams.get('error');
 
   return (
     <div className="bg-[#050505] text-neutral-100 min-h-screen font-sans selection:bg-white selection:text-black relative">
-      {/* Üst Logo Bölümü */}
       <header className="absolute top-0 w-full p-6 flex justify-center">
         <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <div className="p-1.5 bg-neutral-900 border border-neutral-800 rounded-md">
@@ -32,7 +32,6 @@ export default function LoginPage() {
             {t.auth.continue}
           </p>
 
-          {/* Akıllı Hata Mesajı Kutusu */}
           {errorMsg && (
             <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-400 text-sm animate-in fade-in slide-in-from-top-1">
               {errorMsg === 'true' 
@@ -85,5 +84,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#050505] flex items-center justify-center text-neutral-500">Yükleniyor...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
