@@ -5,7 +5,7 @@ import { useLanguage } from '@/components/LanguageContext';
 import { loginUser } from '@/app/actions';
 
 export default function LoginPage({ searchParams }: { searchParams: { error?: string } }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   return (
     <div className="flex items-center justify-center min-h-[80vh] p-6 selection:bg-white selection:text-black">
