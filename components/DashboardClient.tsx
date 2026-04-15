@@ -1,5 +1,6 @@
 "use client";
 
+import { initializePaddle, Paddle } from '@paddle/paddle-js';
 import { useState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -95,13 +96,29 @@ function StatusIndicator({ status, t }: { status: string, t: any }) {
 export default function DashboardClient({ sites, onAdd, onLogout, onDelete }: any) {
   const [lang, setLang] = useState<'tr' | 'en'>('tr');
   const [isUpgrading, setIsUpgrading] = useState(false);
+  const [paddle, setPaddle] = useState<Paddle>(); // PADDLE STATE'İ EKLENDİ
+
   const t = dicts[lang];
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
+
   const searchParams = useSearchParams();
   const error = searchParams.get('error');
   const success = searchParams.get('success');
 
+  // PADDLE'I BAŞLATIYORUZ
+  useEffect(() => {
+    initializePaddle({
+      environment: 'sandbox', // Canlıya geçince 'production' olacak
+      token: 'SENIN_PADDLE_CLIENT_TOKENIN' // Paddle'dan onay alınca buraya token gireceksin
+    }).then((paddleInstance: Paddle | undefined) => {
+      if (paddleInstance) {
+        setPaddle(paddleInstance);
+      }
+    });
+  }, []);
+
+  // Sayfa yenileme efekti
   useEffect(() => {
     const interval = setInterval(() => {
       router.refresh();
@@ -109,16 +126,41 @@ export default function DashboardClient({ sites, onAdd, onLogout, onDelete }: an
     return () => clearInterval(interval);
   }, [router]);
 
+  // YEPYENİ PADDLE ÖDEME FONKSİYONU
   const handleUpgrade = async () => {
     setIsUpgrading(true);
+
+    // Eğer henüz Paddle Token girilmediyse (Onay aşamasındaysan) ekrana bilgi basar
+    if (!paddle?.Checkout) {
+      alert(lang === 'tr' 
+        ? "Paddle ödeme altyapısı onay aşamasındadır. Yakında aktif edilecektir." 
+        : "Paddle billing integration is pending approval.");
+      setIsUpgrading(false);
+      return;
+    }
+
     try {
-      const res = await fetch('/api/checkout', { method: 'POST' });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
+      // Paddle Popup Ekranını Aç
+      paddle.Checkout.open({
+        items: [
+          {
+            priceId: 'pri_xxxxxxxxxxxx', // Paddle'da oluşturduğun ürünün Fiyat ID'si
+            quantity: 1,
+          }
+        ],
+        settings: {
+          theme: 'dark', // Sitenin zümrüt/karanlık tasarımına tam uyum sağlar
+          locale: lang === 'tr' ? 'tr' : 'en'
+        }
+      });
     } catch (err) {
+      console.error("Paddle Hatası:", err);
+    } finally {
       setIsUpgrading(false);
     }
   };
+
+  // ... (Aşağıdaki return () kısmı tamamen aynı kalacak, dokunma) ...
   
   const listVariants: Variants = {
     hidden: { opacity: 0 },
