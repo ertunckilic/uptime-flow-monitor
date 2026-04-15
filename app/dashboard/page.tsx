@@ -23,54 +23,60 @@ export default async function DashboardPage({
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
-  // 3. Sunucu Aksiyonları (Ekleme, Silme, Çıkış)
-  async function addSite(formData: FormData) {
-    'use server';
-    const url = formData.get('url') as string;
-    if (!url) return;
-
-    const supabaseServer = await createClient();
-    const { data: { user } } = await supabaseServer.auth.getUser();
-    if (!user) return;
-
-    try {
-      new URL(url); // URL geçerliliğini kontrol et
-    } catch {
-      redirect('/dashboard?error=invalid');
+    async function addSite(formData: FormData) {
+      'use server';
+      const url = formData.get('url') as string;
+      if (!url) return;
+  
+      const supabaseServer = await createClient();
+      const { data: { user } } = await supabaseServer.auth.getUser();
+      if (!user) return;
+  
+      try {
+        new URL(url); // URL geçerliliğini kontrol et
+      } catch {
+        redirect('/dashboard?error=invalid');
+      }
+  
+      // Çift kayıt kontrolü
+      const { data: existing } = await supabaseServer
+        .from('sites')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('url', url)
+        .single();
+  
+      if (existing) {
+        redirect('/dashboard?error=duplicate');
+      }
+  
+      // Limit Kontrolü
+      const { count } = await supabaseServer
+        .from('sites')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+  
+      if (count !== null && count >= 3) {
+        redirect('/dashboard?error=limit');
+      }
+  
+      // Veritabanına Ekle ve Hatayı Yakala
+      const { error } = await supabaseServer.from('sites').insert({
+        user_id: user.id,
+        url: url,
+        status: 'Pending',
+        ssl_days_left: null
+      });
+  
+      // EĞER SUPABASE İZİN VERMEZSE TERMİNALE YAZDIRACAK
+      if (error) {
+        console.error("Supabase Kayıt Hatası:", error.message);
+        // Şimdilik ekranda geçersiz URL hatası gibi gösterelim ki bir şeylerin ters gittiğini anlayalım
+        redirect('/dashboard?error=invalid'); 
+      }
+  
+      revalidatePath('/dashboard');
     }
-
-    // Çift kayıt kontrolü
-    const { data: existing } = await supabaseServer
-      .from('sites')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('url', url)
-      .single();
-
-    if (existing) {
-      redirect('/dashboard?error=duplicate');
-    }
-
-    // Limit Kontrolü (Şimdilik ücretsiz planda 3 sınırını baz alıyoruz)
-    const { count } = await supabaseServer
-      .from('sites')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id);
-
-    if (count !== null && count >= 3) {
-      redirect('/dashboard?error=limit');
-    }
-
-    // Veritabanına Ekle
-    await supabaseServer.from('sites').insert({
-      user_id: user.id,
-      url: url,
-      status: 'Pending',
-      ssl_days_left: null
-    });
-
-    revalidatePath('/dashboard');
-  }
 
   async function deleteSite(formData: FormData) {
     'use server';
