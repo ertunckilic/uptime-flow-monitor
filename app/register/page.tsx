@@ -2,21 +2,27 @@ import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
-export default function LoginPage({ searchParams }: { searchParams: { error?: string } }) {
+export default function RegisterPage({ searchParams }: { searchParams: { error?: string } }) {
   
-  async function login(formData: FormData) {
+  async function register(formData: FormData) {
     'use server';
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
+    const fullName = formData.get('fullName') as string;
     
     const supabase = await createClient();
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          full_name: fullName,
+        }
+      }
     });
 
     if (error) {
-      return redirect('/login?error=true');
+      return redirect('/register?error=true');
     }
     
     redirect('/dashboard');
@@ -29,17 +35,27 @@ export default function LoginPage({ searchParams }: { searchParams: { error?: st
           <Link href="/" className="text-2xl font-bold tracking-tighter inline-block mb-4">
             UPTIME<span className="text-emerald-500">FLOW</span>
           </Link>
-          <h1 className="text-2xl font-bold">Tekrar hoş geldin</h1>
-          <p className="text-neutral-400 mt-2">Sistemlerini izlemeye devam et.</p>
+          <h1 className="text-2xl font-bold">Hesabını oluştur</h1>
+          <p className="text-neutral-400 mt-2">Sadece 30 saniyede izlemeye başla.</p>
         </div>
 
         {searchParams.error && (
           <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-400 text-sm text-center">
-            E-posta veya şifre hatalı. Lütfen tekrar dene.
+            Kayıt olurken bir hata oluştu. Şifrenin en az 6 karakter olduğuna emin ol.
           </div>
         )}
 
-        <form action={login} className="space-y-4">
+        <form action={register} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-2 text-neutral-300">Ad Soyad</label>
+            <input 
+              type="text" 
+              name="fullName"
+              required
+              className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 transition-all"
+              placeholder="Adınız"
+            />
+          </div>
           <div>
             <label className="block text-sm font-medium mb-2 text-neutral-300">E-posta</label>
             <input 
@@ -56,17 +72,18 @@ export default function LoginPage({ searchParams }: { searchParams: { error?: st
               type="password" 
               name="password"
               required
+              minLength={6}
               className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-emerald-500 transition-all"
-              placeholder="••••••••"
+              placeholder="Minimum 6 karakter"
             />
           </div>
-          <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-emerald-900/20">
-            Giriş Yap
+          <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition-all">
+            Hesabımı Oluştur
           </button>
         </form>
 
         <p className="text-center mt-8 text-sm text-neutral-400">
-          Hesabın yok mu? <Link href="/register" className="text-emerald-500 hover:underline">Ücretsiz kaydol</Link>
+          Zaten hesabın var mı? <Link href="/login" className="text-emerald-500 hover:underline">Giriş yap</Link>
         </p>
       </div>
     </div>
