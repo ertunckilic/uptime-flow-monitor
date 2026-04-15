@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, Variants } from "framer-motion";
 import { Command, Globe, Clock3, LogOut, Plus, Trash2, Languages, Zap, Sparkles } from "lucide-react";
 import Favicon from "@/components/Favicon";
@@ -92,12 +92,15 @@ function StatusIndicator({ status, t }: { status: string, t: any }) {
   );
 }
 
-export default function DashboardClient({ sites, onAdd, onLogout, onDelete, error, success }: any) {
+export default function DashboardClient({ sites, onAdd, onLogout, onDelete }: any) {
   const [lang, setLang] = useState<'tr' | 'en'>('tr');
   const [isUpgrading, setIsUpgrading] = useState(false);
   const t = dicts[lang];
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
+  const searchParams = useSearchParams();
+  const error = searchParams.get('error');
+  const success = searchParams.get('success');
 
   useEffect(() => {
     const interval = setInterval(() => {
