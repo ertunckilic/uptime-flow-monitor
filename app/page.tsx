@@ -70,7 +70,7 @@ export default function LandingPage() {
             <div className="p-10 rounded-3xl border-2 border-emerald-500 bg-emerald-500/5 flex flex-col items-center relative overflow-hidden">
               <div className="absolute top-4 right-[-35px] bg-emerald-500 text-black text-[10px] font-bold py-1 px-10 rotate-45">POPÜLER</div>
               <h3 className="text-xl font-medium mb-2 text-emerald-400">Pro</h3>
-              <div className="text-4xl font-bold mb-6">$19<span className="text-lg text-neutral-500">/ay</span></div>
+              <div className="text-4xl font-bold mb-6">$9.99<span className="text-lg text-neutral-500">/ay</span></div>
               <ul className="text-neutral-400 space-y-4 mb-10 text-left w-full">
                 <li className="flex items-center gap-2">✅ Sınırsız Web Sitesi</li>
                 <li className="flex items-center gap-2 text-emerald-400">✅ Öncelikli Kontrol</li>
