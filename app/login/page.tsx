@@ -13,8 +13,9 @@ function LoginContent() {
   const errorMsg = searchParams.get('error');
 
   return (
-    <div className="bg-[#050505] text-neutral-100 min-h-screen font-sans selection:bg-white selection:text-black relative">
-      <header className="absolute top-0 w-full p-6 flex justify-center">
+    <div className="bg-[#050505] text-neutral-100 min-h-screen flex flex-col font-sans selection:bg-white selection:text-black">
+      {/* Header'ı absolute'tan kurtarıp akışa dahil ettik */}
+      <header className="w-full p-6 flex justify-center shrink-0">
         <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
           <div className="p-1.5 bg-neutral-900 border border-neutral-800 rounded-md">
             <Command className="w-5 h-5 text-white" />
@@ -23,7 +24,8 @@ function LoginContent() {
         </Link>
       </header>
 
-      <div className="flex items-center justify-center min-h-screen p-6">
+      {/* Form alanını dikeyde ortalayan esnek yapı */}
+      <div className="flex-1 flex items-center justify-center p-6 pb-12">
         <div className="w-full max-w-sm">
           <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">
             {t.auth.welcome}
