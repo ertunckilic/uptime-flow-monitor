@@ -24,24 +24,27 @@ export async function registerUser(formData: FormData) {
   const fullName = formData.get('fullName') as string;
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
+  // data değişkenini de alıyoruz ki oturum açılıp açılmadığını kontrol edebilelim
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: {
-        full_name: fullName,
-      },
-      // Maildeki onay butonuna basınca güvenli kapıdan (callback) geçip dashboard'a gitsin
+      data: { full_name: fullName },
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/dashboard`,
     }
   });
 
   if (error) {
-    // Hata varsa güvenli bir şekilde register sayfasına geri yolla
     return redirect(`/register?error=${encodeURIComponent(error.message)}`);
   }
 
-  // Başarılıysa güvenli Türkçe karakterlerle login sayfasına yönlendir ve mesaj ver
+  // ÇÖZÜM BURADA: Eğer Supabase kullanıcıyı anında içeri aldıysa (oturum açıldıysa)
+  // Onu login'e gönderip middleware'i kitlemek yerine direkt dashboard'a alıyoruz.
+  if (data.session) {
+    return redirect('/dashboard');
+  }
+
+  // Eğer e-posta onayı gerekiyorsa ve oturum açılmadıysa normal akışa devam et
   return redirect(`/login?error=${encodeURIComponent('Kayıt başarılı! Lütfen e-posta adresinize gelen onay linkine tıklayın.')}`);
 }
 
