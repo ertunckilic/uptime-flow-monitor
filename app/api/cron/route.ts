@@ -59,7 +59,16 @@ export async function GET(request: Request) {
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
     try {
-      const res = await fetch(site.url, { method: 'HEAD', cache: 'no-store', signal: controller.signal });
+      const res = await fetch(site.url, { 
+        method: 'GET', 
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.5'
+        },
+        cache: 'no-store',
+        signal: controller.signal 
+      });
       if (!res.ok) isOffline = true;
     } catch {
       isOffline = true;
