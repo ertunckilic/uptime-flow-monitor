@@ -69,6 +69,11 @@ function LoginContent() {
                 placeholder={t.auth.placeholderPass1}
               />
             </div>
+            <div className="flex justify-end mt-1">
+              <Link href="/forgot-password" className="text-xs text-neutral-500 hover:text-white transition-colors font-medium">
+                {lang === 'tr' ? 'Şifremi unuttum' : 'Forgot password?'}
+              </Link>
+            </div>
             <button 
               type="submit" 
               className="w-full bg-white text-black font-medium py-3 rounded-lg hover:bg-neutral-200 transition-colors mt-2 active:scale-[0.98]"

@@ -33,3 +33,23 @@ export async function registerUser(formData: FormData) {
   }
   redirect('/dashboard');
 }
+
+export async function resetPassword(formData: FormData) {
+  'use server';
+  const email = formData.get('email') as string;
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/reset-password`,
+  });
+  if (error) return redirect('/forgot-password?error=true');
+  return redirect('/forgot-password?success=true');
+}
+
+export async function updatePassword(formData: FormData) {
+  'use server';
+  const password = formData.get('password') as string;
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) return redirect('/reset-password?error=true');
+  return redirect('/login?error=Şifreniz başarıyla güncellendi. Lütfen giriş yapın.');
+}
