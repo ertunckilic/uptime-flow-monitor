@@ -18,20 +18,31 @@ export async function loginUser(formData: FormData) {
 }
 
 export async function registerUser(formData: FormData) {
+  'use server';
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
   const fullName = formData.get('fullName') as string;
-  
+
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({
-    email, password, options: { data: { full_name: fullName } }
+    email,
+    password,
+    options: {
+      data: {
+        full_name: fullName,
+      },
+      // Maildeki onay butonuna basınca güvenli kapıdan (callback) geçip dashboard'a gitsin
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/dashboard`,
+    }
   });
 
   if (error) {
-    // Gerçek hata mesajını URL'ye ekliyoruz
+    // Hata varsa güvenli bir şekilde register sayfasına geri yolla
     return redirect(`/register?error=${encodeURIComponent(error.message)}`);
   }
-  redirect('/dashboard');
+
+  // Başarılıysa güvenli Türkçe karakterlerle login sayfasına yönlendir ve mesaj ver
+  return redirect(`/login?error=${encodeURIComponent('Kayıt başarılı! Lütfen e-posta adresinize gelen onay linkine tıklayın.')}`);
 }
 
 export async function resetPassword(formData: FormData) {
