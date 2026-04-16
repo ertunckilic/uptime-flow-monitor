@@ -56,6 +56,6 @@ export async function updatePassword(formData: FormData) {
     return redirect('/reset-password?error=true');
   }
   
-  // URL'i güvenli hale getirmek için encodeURIComponent ekledik
-  return redirect(`/login?error=${encodeURIComponent('Şifreniz başarıyla güncellendi. Lütfen giriş yapın.')}`);
+  // Kullanıcı zaten doğrulandığı için direkt dashboard'a, temiz bir başlangıca gönderiyoruz
+  return redirect('/dashboard');
 }
