@@ -51,6 +51,11 @@ export async function updatePassword(formData: FormData) {
   const password = formData.get('password') as string;
   const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password });
-  if (error) return redirect('/reset-password?error=true');
-  return redirect('/login?error=Şifreniz başarıyla güncellendi. Lütfen giriş yapın.');
+  
+  if (error) {
+    return redirect('/reset-password?error=true');
+  }
+  
+  // URL'i güvenli hale getirmek için encodeURIComponent ekledik
+  return redirect(`/login?error=${encodeURIComponent('Şifreniz başarıyla güncellendi. Lütfen giriş yapın.')}`);
 }
