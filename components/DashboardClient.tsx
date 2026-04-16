@@ -93,7 +93,7 @@ function StatusIndicator({ status, t }: { status: string, t: any }) {
   );
 }
 
-export default function DashboardClient({ sites, onAdd, onLogout, onDelete }: any) {
+export default function DashboardClient({ userId, sites, onAdd, onLogout, onDelete }: any) {
   const [lang, setLang] = useState<'tr' | 'en'>('tr');
   const [isUpgrading, setIsUpgrading] = useState(false);
   const [paddle, setPaddle] = useState<Paddle>(); // PADDLE STATE'İ EKLENDİ
@@ -130,7 +130,6 @@ export default function DashboardClient({ sites, onAdd, onLogout, onDelete }: an
   const handleUpgrade = async () => {
     setIsUpgrading(true);
 
-    // Eğer henüz Paddle Token girilmediyse (Onay aşamasındaysan) ekrana bilgi basar
     if (!paddle?.Checkout) {
       alert(lang === 'tr' 
         ? "Paddle ödeme altyapısı onay aşamasındadır. Yakında aktif edilecektir." 
@@ -140,16 +139,18 @@ export default function DashboardClient({ sites, onAdd, onLogout, onDelete }: an
     }
 
     try {
-      // Paddle Popup Ekranını Aç
       paddle.Checkout.open({
         items: [
           {
-            priceId: 'pri_xxxxxxxxxxxx', // Paddle'da oluşturduğun ürünün Fiyat ID'si
+            priceId: 'pri_xxxxxxxxxxxx',
             quantity: 1,
           }
         ],
+        customData: {
+          user_id: userId // PADDLE'A KULLANICIYI BURADA TANITIYORUZ
+        },
         settings: {
-          theme: 'dark', // Sitenin zümrüt/karanlık tasarımına tam uyum sağlar
+          theme: 'dark',
           locale: lang === 'tr' ? 'tr' : 'en'
         }
       });
