@@ -58,6 +58,7 @@ export async function GET(request: Request) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
+    // app/api/cron/route.ts içindeki kontrol (isOffline mantığı için):
     try {
       const res = await fetch(site.url, { 
         method: 'GET', 
@@ -69,7 +70,11 @@ export async function GET(request: Request) {
         cache: 'no-store',
         signal: controller.signal 
       });
-      if (!res.ok) isOffline = true;
+      
+      // Eğer başarılı değilse VE WAF engeli de değilse, o zaman gerçekten çökmüştür.
+      if (!res.ok && res.status !== 403 && res.status !== 503) {
+        isOffline = true;
+      }
     } catch {
       isOffline = true;
     } finally {

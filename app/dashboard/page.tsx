@@ -56,6 +56,7 @@ export default async function DashboardPage() {
   
       // Anlık hızlı tarama (Initial Ping)
       let initialStatus = 'Pending';
+      // app/dashboard/page.tsx içindeki kontrol:
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3000);
@@ -72,7 +73,13 @@ export default async function DashboardPage() {
         });
         
         clearTimeout(timeoutId);
-        initialStatus = res.ok ? 'Online' : 'Error';
+        
+        // ZEKİ KONTROL: Eğer yanıt başarılıysa (200) VEYA bizi WAF engellediyse (403, 503), site aslında ayaktadır!
+        if (res.ok || res.status === 403 || res.status === 503) {
+          initialStatus = 'Online';
+        } else {
+          initialStatus = 'Error';
+        }
       } catch {
         initialStatus = 'Error';
       }
