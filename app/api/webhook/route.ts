@@ -10,20 +10,22 @@ const supabaseAdmin = createClient(
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    // Güvenlik Duvarı: URL sonuna eklenecek gizli şifre kontrolü
+    const url = new URL(req.url);
+    const secret = url.searchParams.get('secret');
     
-    // Paddle'dan gelen olayın türü ve verisi
+    if (secret !== process.env.PADDLE_WEBHOOK_SECRET) {
+      return NextResponse.json({ error: 'Yetkisiz islem' }, { status: 401 });
+    }
+
+    const body = await req.json();
     const eventType = body.event_type;
     const data = body.data;
 
-    // Sadece başarılı abonelik işlemlerini yakalıyoruz
     if (eventType === 'subscription.created' || eventType === 'subscription.updated' || eventType === 'transaction.completed') {
-      
-      // Dashboard'dan Paddle'a fısıldadığımız o gizli kullanıcı ID'sini alıyoruz
       const userId = data.custom_data?.user_id;
 
       if (userId) {
-        // Kullanıcıyı veritabanında bul ve doğrudan Premium yap
         await supabaseAdmin.from('subscriptions').upsert({
           user_id: userId,
           is_premium: true,

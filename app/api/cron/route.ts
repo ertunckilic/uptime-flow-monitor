@@ -24,13 +24,13 @@ const checkSSLExpiry = (url: string): Promise<number | null> => {
 };
 
 export async function GET(request: Request) {
-  // Resend motorunu sadece cron çalıştığında uyanacak şekilde buraya aldık
   const resend = new Resend(process.env.RESEND_API_KEY!);
 
-  // const authHeader = request.headers.get('authorization');
-  // if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-  //  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  // }
+  // Güvenlik Duvarı Aktif: Sadece yetkili Vercel Cron tetikleyebilir
+  const authHeader = request.headers.get('authorization');
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
   
@@ -58,7 +58,6 @@ export async function GET(request: Request) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-    // app/api/cron/route.ts içindeki kontrol (isOffline mantığı için):
     try {
       const res = await fetch(site.url, { 
         method: 'GET', 
@@ -71,7 +70,6 @@ export async function GET(request: Request) {
         signal: controller.signal 
       });
       
-      // Eğer başarılı değilse VE WAF engeli de değilse, o zaman gerçekten çökmüştür.
       if (!res.ok && res.status !== 403 && res.status !== 503) {
         isOffline = true;
       }
@@ -90,7 +88,7 @@ export async function GET(request: Request) {
         if (user?.email) {
           const isDown = currentStatus === 'Error';
           await resend.emails.send({
-            from: 'UptimeFlow <onboarding@resend.dev>',
+            from: 'UptimeFlow <noreply@uptimeflow.xyz>', // Kendi profesyonel alan adın
             to: user.email,
             subject: isDown ? `ACIL: ${site.url} Coktu!` : `DUZELDI: ${site.url} Yeniden Aktif!`,
             html: `<div style="font-family: monospace; color: #333;">
