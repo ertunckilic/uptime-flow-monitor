@@ -28,9 +28,13 @@ const checkSSLExpiry = (url: string): Promise<number | null> => {
 export async function GET(request: Request) {
   const resend = new Resend(process.env.RESEND_API_KEY!);
 
-  // Güvenlik Duvarı Aktif: Sadece yetkili Vercel Cron tetikleyebilir
   const authHeader = request.headers.get('authorization');
+
+  console.log("Cron-job'dan Gelen Header:", authHeader);
+  console.log("Vercel'deki Kayitli Sifre (CRON_SECRET):", process.env.CRON_SECRET);
+
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    console.error("HATA: Sifreler eslesmedi!");
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -90,7 +94,7 @@ export async function GET(request: Request) {
         if (user?.email) {
           const isDown = currentStatus === 'Error';
           await resend.emails.send({
-            from: 'UptimeFlow <noreply@uptimeflow.xyz>', // Kendi profesyonel alan adın
+            from: 'UptimeFlow <noreply@uptimeflow.xyz>',
             to: user.email,
             subject: isDown ? `ACIL: ${site.url} Coktu!` : `DUZELDI: ${site.url} Yeniden Aktif!`,
             html: `<div style="font-family: monospace; color: #333;">
