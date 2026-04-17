@@ -30,11 +30,7 @@ export async function GET(request: Request) {
 
   const authHeader = request.headers.get('authorization');
 
-  console.log("Cron-job'dan Gelen Header:", authHeader);
-  console.log("Vercel'deki Kayitli Sifre (CRON_SECRET):", process.env.CRON_SECRET);
-
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    console.error("HATA: Sifreler eslesmedi!");
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
