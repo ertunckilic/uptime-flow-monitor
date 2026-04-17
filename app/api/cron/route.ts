@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import https from 'https';
 
+export const dynamic = 'force-dynamic';
+
 const checkSSLExpiry = (url: string): Promise<number | null> => {
   return new Promise((resolve) => {
     try {
